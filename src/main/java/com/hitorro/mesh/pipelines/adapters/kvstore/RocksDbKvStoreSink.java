@@ -29,6 +29,12 @@ public final class RocksDbKvStoreSink implements Sink {
     private final Path   dir;
     private final AtomicLong n = new AtomicLong();
     private RocksDbSharedRegistry.Entry entry;
+    /**
+     * Per-task highest-seq-seen. Retried tasks with lower seqs are
+     * skipped (idempotent replay). Ephemeral to this sink instance —
+     * a subsequent job with a fresh task id starts at 0 again.
+     */
+    private final java.util.Map<String, Long> taskSeqSeen = new java.util.concurrent.ConcurrentHashMap<>();
 
     public RocksDbKvStoreSink(String name, String keyExpr, Path home) {
         this.name    = name;
@@ -48,6 +54,21 @@ public final class RocksDbKvStoreSink implements Sink {
         entry.db.put(key.getBytes(StandardCharsets.UTF_8),
                      JSON.writeValueAsBytes(row));
         n.incrementAndGet();
+    }
+
+    /**
+     * Idempotent write — dedupes by ({@code taskId}, {@code seq}) so a
+     * retried task's re-played rows land at most once. The scheduler
+     * hands each row a monotonic per-task seq; if we've already seen
+     * a seq >= this one for the same task, skip.
+     */
+    @Override
+    public void addIdempotent(String taskId, long seq, JsonNode row) throws Exception {
+        if (taskId == null) { add(row); return; }
+        Long prev = taskSeqSeen.get(taskId);
+        if (prev != null && prev >= seq) return;    // already processed
+        taskSeqSeen.put(taskId, seq);
+        add(row);
     }
 
     @Override public long count() { return n.get(); }
