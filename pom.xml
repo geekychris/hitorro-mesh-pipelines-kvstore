@@ -36,6 +36,26 @@
             <artifactId>hitorro-mesh-pipelines</artifactId>
             <version>3.0.1</version>
         </dependency>
+        <!-- The actual KvStoreSink + RocksDbSharedRegistry live in hitorro-kvstore
+             so non-mesh callers can use them directly. This module is glue only.
+
+             Exclude slf4j-reload4j (transitive via hitorro-util → hadoop-common):
+             conflicts with Spring Boot's logback and prevents driver startup. -->
+        <dependency>
+            <groupId>com.hitorro</groupId>
+            <artifactId>hitorro-kvstore</artifactId>
+            <version>3.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-reload4j</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>ch.qos.reload4j</groupId>
+                    <artifactId>reload4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.rocksdb</groupId>
             <artifactId>rocksdbjni</artifactId>

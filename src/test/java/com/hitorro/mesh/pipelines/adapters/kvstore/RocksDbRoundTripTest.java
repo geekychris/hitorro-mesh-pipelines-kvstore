@@ -7,8 +7,8 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hitorro.mesh.pipelines.model.SinkSpec;
 import com.hitorro.mesh.pipelines.model.SourceSpec;
-import com.hitorro.mesh.pipelines.sinks.Sink;
 import com.hitorro.mesh.pipelines.sinks.SinkRegistry;
+import com.hitorro.util.core.iterator.sinks.Sink;
 import com.hitorro.mesh.pipelines.sources.SourceFactory;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -30,7 +30,7 @@ class RocksDbRoundTripTest {
         SinkRegistry reg = new SinkRegistry(home);
         // Adapter is picked up via META-INF/services in this same jar.
         try (Sink sink = reg.create(new SinkSpec.KvStore("cities", "iso3"))) {
-            sink.open();
+            sink.start();
             sink.add(JSON.readTree("{\"iso3\":\"USA\",\"name\":\"United States\"}"));
             sink.add(JSON.readTree("{\"iso3\":\"CHN\",\"name\":\"China\"}"));
             sink.add(JSON.readTree("{\"iso3\":\"IND\",\"name\":\"India\"}"));
