@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="assets/logo.png" alt="Hitorro Mesh Pipelines Kvstore logo" width="180">
+</p>
+
 # hitorro-mesh-pipelines-kvstore
 
 RocksDB backend for the `kvstore` sink + source kinds in
