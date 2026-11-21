@@ -3,8 +3,9 @@
  */
 package com.hitorro.mesh.pipelines.adapters.kvstore;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import com.hitorro.util.json.JsonMappers;
 import com.hitorro.mesh.pipelines.model.SinkSpec;
 import com.hitorro.mesh.pipelines.model.SourceSpec;
 import com.hitorro.mesh.pipelines.sinks.SinkRegistry;
@@ -23,7 +24,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class RocksDbRoundTripTest {
 
-    private static final ObjectMapper JSON = new ObjectMapper();
+    private static final ObjectMapper JSON = JsonMappers.json();
 
     @Test
     void write_via_sink_read_back_via_source(@TempDir Path home) throws Exception {
@@ -48,7 +49,7 @@ class RocksDbRoundTripTest {
             if (it instanceof AutoCloseable c) c.close();
         }
         assertThat(read).hasSize(3);
-        assertThat(read).extracting(r -> r.get("iso3").asText())
+        assertThat(read).extracting(r -> r.get("iso3").asString())
                 .containsExactlyInAnyOrder("USA", "CHN", "IND");
     }
 }
